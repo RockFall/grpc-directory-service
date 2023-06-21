@@ -42,21 +42,21 @@ def run_client(server_address):
         if parsed_command is None:
             continue
 
+        # Lidando com cada função: `insert`, `lookup`, `register` e `terminate`
         if parsed_command[0] == 'insert':
             key = int(parsed_command[1])
             description = parsed_command[2]
             value = float(parsed_command[3])
-
+            # Envia a requisição de inserção para o servidor e printa a resposta
             request = directory_pb2.DirectoryEntry(key=key, description=description, value=value)
             response = stub.Insert(request)
             print(response.status)
 
         elif parsed_command[0] == 'lookup':
-            print("?")
             key = parsed_command[1]
+            # Envia a requisição de busca para o servidor e printa a resposta
             request = directory_pb2.LookupRequest(key=key)
             response = stub.Lookup(request)
-            print("?")
             if response.key != -1:
                 print(f"{response.description},{response.value}")
             else:
@@ -64,11 +64,14 @@ def run_client(server_address):
                 
         elif parsed_command[0] == 'register':
             server_name, port = parsed_command[1:]
+            # Envia a requisição de registro para o servidor e printa a resposta
             request = directory_pb2.RegisterRequest(server_info=directory_pb2.ServerInfo(hostname=server_name, port=port))
             response = stub.Register(request)
             print(response.status)
+
         elif parsed_command[0] == 'terminate':
-            request = directory_pb2.TerminateRequest()
+            # Envia a requisição de terminação para o servidor e printa a resposta
+            request = directory_pb2.Empty()
             response = stub.Terminate(request)
             print(response.num_keys_stored)
             break

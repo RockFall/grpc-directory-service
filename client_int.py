@@ -1,26 +1,26 @@
 import grpc
-import integration_pb2
 import integration_pb2_grpc
 import directory_pb2
-import directory_pb2_grpc
 
+# Inicia o cliente gRPC
 def run_client(server_address):
     channel = grpc.insecure_channel(server_address)
     stub = integration_pb2_grpc.IntegrationServiceStub(channel)
 
-    print("Connected to integration server on", server_address)
-
     while True:
         command = input().strip()
 
+        # Função de terminação
         if command == 'T':
             response = stub.Terminate(directory_pb2.Empty())
             print(response.num_keys_stored)
             break
+        # Função de busca
         elif command.startswith('C'):
             _, key = command.split(',')
             key = int(key)
 
+            # Envia a requisição de busca para o servidor e printa a resposta
             lookup_request = directory_pb2.LookupRequest(key=key)
             lookup_response = stub.Lookup(lookup_request)
 

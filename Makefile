@@ -15,13 +15,13 @@ stubs:
 	$(PROTOC) -I $(PROTO_DIR) --python_out=. --grpc_python_out=. $(PROTO_FILES)
 
 run_cli_dir:
-	python client_dir.py $(arg)
+	python3 client_dir.py $(arg)
 
 run_serv_dir:
-	python server_dir.py $(arg)
+	python3 server_dir.py $(arg)
 
 run_serv_int:
-	python server_int.py $(arg)
+	python3 server_int.py $(arg)
 
 run_cli_int:
-	python client_int.py $(arg)
+	python3 client_int.py $(arg)

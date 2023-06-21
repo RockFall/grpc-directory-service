@@ -7,9 +7,10 @@ import integration_pb2
 import integration_pb2_grpc
 
 class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
-    def __init__(self, stop_event):
+    def __init__(self, stop_event, port):
         self.directory = {}
         self._stop_event = stop_event
+        self.port = port
 
     def Insert(self, request, context):
         key = request.key
@@ -43,10 +44,10 @@ class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
         channel = grpc.insecure_channel(f"{hostname}:{port}")
         stub = integration_pb2_grpc.IntegrationServiceStub(channel)
         
-        integration_register_request = integration_pb2.I_RegisterRequest(hostname=hostname, port=port, keys=list(self.directory.keys()))
-        integration_register_response = stub.I_RegisterResponse(integration_register_request)
+        integration_register_request = integration_pb2.I_RegisterRequest(hostname=hostname, port=int(self.port), keys=list(self.directory.keys()))
+        integration_register_response = stub.Register(integration_register_request)
 
-        return integration_register_response.num_keys_received
+        return directory_pb2.RegisterResponse(status=integration_register_response.num_keys_received)
 
     def Terminate(self, request, context):
         num_keys_stored  = len(self.directory)
@@ -60,10 +61,9 @@ class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
 def run_server(port):
     stop_event = threading.Event()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    directory_pb2_grpc.add_DirectoryServiceServicer_to_server(DirectoryServicer(stop_event), server)
+    directory_pb2_grpc.add_DirectoryServiceServicer_to_server(DirectoryServicer(stop_event, str(port)), server)
     server.add_insecure_port('[::]:' + str(port))
     server.start()
-    print("Server started. Listening on port " + str(port) + ".")
     stop_event.wait()
     server.stop()
 

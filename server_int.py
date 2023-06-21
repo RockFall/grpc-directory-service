@@ -24,11 +24,10 @@ class IntegrationService(integration_pb2_grpc.IntegrationServiceServicer):
 
         for directory_info in self.directories:
             hostname, port, keys = directory_info
-            if key in keys:
-                return integration_pb2.I_LookupResponse(
-                    participant_name=hostname,
-                    participant_port=port
-                )
+            return integration_pb2.I_LookupResponse(
+                participant_name=hostname,
+                participant_port=port
+            )
 
         return integration_pb2.I_LookupResponse(
             participant_name="ND",

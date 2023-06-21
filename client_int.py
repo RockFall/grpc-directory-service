@@ -27,22 +27,9 @@ def run_client(server_address):
             if lookup_response.participant_name == 'ND':
                 print("ND")
             else:
-                participant_name = lookup_response.participant_name
-                participant_port = lookup_response.participant_port
+                print(f'{lookup_response.participant_name}:{lookup_response.participant_port}')
 
-                directory_address = f"{participant_name}:{participant_port}"
 
-                directory_channel = grpc.insecure_channel(directory_address)
-                directory_stub = directory_pb2_grpc.DirectoryServiceStub(directory_channel)
-
-                key = int(input().strip().split(',')[1])
-                directory_lookup_request = directory_pb2.LookupRequest(key=key)
-                directory_lookup_response = directory_stub.Lookup(directory_lookup_request)
-
-                if directory_lookup_response.key != -1:
-                    print(f"{directory_lookup_response.description},{directory_lookup_response.value}")
-                else:
-                    print("-1")
 
 if __name__ == '__main__':
     import sys

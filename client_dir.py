@@ -52,9 +52,11 @@ def run_client(server_address):
             print(response.status)
 
         elif parsed_command[0] == 'lookup':
+            print("?")
             key = parsed_command[1]
             request = directory_pb2.LookupRequest(key=key)
             response = stub.Lookup(request)
+            print("?")
             if response.key != -1:
                 print(f"{response.description},{response.value}")
             else:

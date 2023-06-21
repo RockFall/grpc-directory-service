@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message DirectoryEntry {
+  int32 key = 1;
+  string description = 2;
+  float value = 3;
+}
+
+message ServerInfo {
+  string hostname = 1;
+  int32 port = 2;
+}
+
+message Empty {}
+
+service DirectoryService {
+  rpc Insert(DirectoryEntry) returns (InsertResponse);
+  rpc Lookup(LookupRequest) returns (DirectoryEntry);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Terminate(Empty) returns (TerminateResponse);
+}
+
+message InsertResponse {
+  int32 status = 1;
+}
+
+message LookupRequest {
+  int32 key = 1;
+}
+
+message RegisterRequest {
+  ServerInfo server_info = 1;
+}
+
+message RegisterResponse {
+  int32 status = 1;
+}
+
+message TerminateResponse {
+  int32 num_keys_stored = 1;
+}

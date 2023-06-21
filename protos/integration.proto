@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "directory.proto";
+
+service IntegrationService {
+  rpc Register(I_RegisterRequest) returns (I_RegisterResponse);
+  rpc Lookup(LookupRequest) returns (I_LookupResponse);
+  rpc Terminate(Empty) returns (I_TerminateResponse);
+}
+
+message I_RegisterRequest {
+  string hostname = 1;
+  int32 port = 2;
+  repeated int32 keys = 3;
+}
+
+message I_RegisterResponse {
+  int32 num_keys_received = 1;
+}
+
+message I_LookupResponse {
+  string participant_name = 1;
+  int32 participant_port = 2;
+}
+
+message I_TerminateResponse {
+  int32 num_keys_registered = 1;
+}

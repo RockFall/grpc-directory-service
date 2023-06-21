@@ -1,5 +1,7 @@
 import grpc
 from concurrent import futures
+import directory_pb2
+import directory_pb2_grpc
 import integration_pb2
 import integration_pb2_grpc
 
@@ -15,7 +17,7 @@ class IntegrationService(integration_pb2_grpc.IntegrationServiceServicer):
         directory_info = (hostname, port, keys)
         self.directories.append(directory_info)
 
-        return integration_pb2.RegisterResponse(num_keys_received=len(keys))
+        return integration_pb2.I_RegisterResponse(num_keys_received=len(keys))
 
     def Lookup(self, request, context):
         key = request.key
@@ -23,12 +25,12 @@ class IntegrationService(integration_pb2_grpc.IntegrationServiceServicer):
         for directory_info in self.directories:
             hostname, port, keys = directory_info
             if key in keys:
-                return integration_pb2.LookupResponse(
+                return integration_pb2.I_LookupResponse(
                     participant_name=hostname,
                     participant_port=port
                 )
 
-        return integration_pb2.LookupResponse(
+        return integration_pb2.I_LookupResponse(
             participant_name="ND",
             participant_port=0
         )
@@ -48,5 +50,12 @@ def run_server(port):
 
 
 if __name__ == '__main__':
-    port = int(input().strip())
+    import sys
+    if len(sys.argv) > 1:
+        # Porta via argumento (ex.: arg=5555)
+        port = int(sys.argv[1])
+    else:
+        # Ou via input no terminal/entrada padrão
+        port = int(input().strip())
+
     run_server(port)

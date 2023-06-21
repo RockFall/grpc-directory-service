@@ -43,18 +43,23 @@ def run_client(server_address):
             continue
 
         if parsed_command[0] == 'insert':
-            key, description, value = parsed_command[1:]
+            key = int(parsed_command[1])
+            description = parsed_command[2]
+            value = float(parsed_command[3])
+
             request = directory_pb2.DirectoryEntry(key=key, description=description, value=value)
             response = stub.Insert(request)
-            print(response.status)
+            print("Server response:", response.status)
+
         elif parsed_command[0] == 'lookup':
             key = parsed_command[1]
-            request = directory_pb2.QueryRequest(key=key)
-            response = stub.Query(request)
-            if response.description:
+            request = directory_pb2.LookupRequest(key=key)
+            response = stub.Lookup(request)
+            if response.key != -1:
                 print(f"{response.description},{response.value}")
             else:
                 print("-1")
+                """
         elif parsed_command[0] == 'register':
             server_name, port = parsed_command[1:]
             request = directory_pb2.RegisterRequest(server_info=directory_pb2.ServerInfo(hostname=server_name, port=port))
@@ -64,8 +69,15 @@ def run_client(server_address):
             request = directory_pb2.TerminateRequest()
             response = stub.Terminate(request)
             print(response.num_keys_stored)
-            break
+            break"""
 
 if __name__ == '__main__':
-    server_address = input()
+    import sys
+    if len(sys.argv) > 1:
+        # Endereço via argumento (ex.: arg=localhost:5555)
+        server_address = sys.argv[1]
+    else:
+        # Ou via input no terminal/entrada padrão
+        server_address = input().strip()
+
     run_client(server_address)

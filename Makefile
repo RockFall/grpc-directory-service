@@ -1,4 +1,5 @@
 # Makefile para compilação e execução dos programas cliente e servidor
+.PHONY: clean stubs run_cli_dir run_serv_dir run_serv_int run_cli_int
 
 # Variáveis
 PROTOC = python -m grpc_tools.protoc
@@ -8,19 +9,19 @@ PROTO_PY_FILES = directory_pb2.py directory_pb2_grpc.py integration_pb2.py integ
 
 # Regras
 clean:
-	rm -f $(PROTO_PY_FILES) client server
+	rm -rf $(PROTO_PY_FILES) __pycache__
 
 stubs:
 	$(PROTOC) -I $(PROTO_DIR) --python_out=. --grpc_python_out=. $(PROTO_FILES)
 
-run_cli_dir: client_dir.py $(PROTO_PY_FILES)
-	python client_dir.py $(ARGS)
+run_cli_dir:
+	python client_dir.py $(arg)
 
-run_serv_dir: server_dir.py $(PROTO_PY_FILES)
-	python server_dir.py $(PORT)
+run_serv_dir:
+	python server_dir.py $(arg)
 
-run_serv_int: server_int.py $(PROTO_PY_FILES)
-	python server_int.py $(PORT)
+run_serv_int:
+	python server_int.py $(arg)
 
-run_cli_int: client_int.py $(PROTO_PY_FILES)
-	python client_int.py $(ARGS)
+run_cli_int:
+	python client_int.py $(arg)

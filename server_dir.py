@@ -1,21 +1,20 @@
 import grpc
 from concurrent import futures
+import threading
 import directory_pb2
 import directory_pb2_grpc
 import integration_pb2
 import integration_pb2_grpc
 
 class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
-    def __init__(self):
+    def __init__(self, stop_event):
         self.directory = {}
-
+        self._stop_event = stop_event
 
     def Insert(self, request, context):
         key = request.key
         description = request.description
         value = request.value
-
-        print("Inserting key: " + key + " with value: " + value)
 
         if key in self.directory:
             self.directory[key].description = description
@@ -29,12 +28,11 @@ class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
 
     def Lookup(self, request, context):
         key = request.key
-        print("Looking up key: " + key)
 
         if key in self.directory:
             return self.directory[key]
         else:
-            return directory_pb2.DirectoryEntry()
+            return directory_pb2.DirectoryEntry(key=-1, description="", value=0)
 
 
     def Register(self, request, context):
@@ -42,37 +40,40 @@ class DirectoryServicer(directory_pb2_grpc.DirectoryServiceServicer):
         hostname = server_info.hostname
         port = server_info.port
 
-        print("Registering server: " + hostname + ":" + str(port))
-
         channel = grpc.insecure_channel(f"{hostname}:{port}")
         stub = integration_pb2_grpc.IntegrationServiceStub(channel)
         
         integration_register_request = integration_pb2.I_RegisterRequest(hostname=hostname, port=port, keys=list(self.directory.keys()))
         integration_register_response = stub.I_RegisterResponse(integration_register_request)
 
-        # TODO: Implement logic to register the server
-
         return integration_register_response.num_keys_received
 
     def Terminate(self, request, context):
         num_keys_stored  = len(self.directory)
 
-        print("Terminating server. Keys stored: " + str(num_keys_stored))
-
-        # Lógica para encerrar o servidor
-        # ...
+        self._stop_event.set()
 
         return directory_pb2.TerminateResponse(num_keys_stored=num_keys_stored)
-    
+  
+
 # Inicie o servidor gRPC
 def run_server(port):
+    stop_event = threading.Event()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    directory_pb2_grpc.add_DirectoryServiceServicer_to_server(DirectoryServicer(), server)
+    directory_pb2_grpc.add_DirectoryServiceServicer_to_server(DirectoryServicer(stop_event), server)
     server.add_insecure_port('[::]:' + str(port))
     server.start()
     print("Server started. Listening on port " + str(port) + ".")
-    server.wait_for_termination()
+    stop_event.wait()
+    server.stop()
 
 if __name__ == '__main__':
-    port = int(input().strip())
+    import sys
+    if len(sys.argv) > 1:
+        # Porta via argumento (ex.: arg=5555)
+        port = int(sys.argv[1])
+    else:
+        # Ou via input no terminal/entrada padrão
+        port = int(input().strip())
+
     run_server(port)

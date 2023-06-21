@@ -49,7 +49,7 @@ def run_client(server_address):
 
             request = directory_pb2.DirectoryEntry(key=key, description=description, value=value)
             response = stub.Insert(request)
-            print("Server response:", response.status)
+            print(response.status)
 
         elif parsed_command[0] == 'lookup':
             key = parsed_command[1]
@@ -59,7 +59,7 @@ def run_client(server_address):
                 print(f"{response.description},{response.value}")
             else:
                 print("-1")
-                """
+                
         elif parsed_command[0] == 'register':
             server_name, port = parsed_command[1:]
             request = directory_pb2.RegisterRequest(server_info=directory_pb2.ServerInfo(hostname=server_name, port=port))
@@ -69,7 +69,7 @@ def run_client(server_address):
             request = directory_pb2.TerminateRequest()
             response = stub.Terminate(request)
             print(response.num_keys_stored)
-            break"""
+            break
 
 if __name__ == '__main__':
     import sys
